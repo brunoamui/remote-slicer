@@ -1,0 +1,5 @@
+argparse==1.2.1
+pexpect==4.2.1
+ptyprocess==0.5.1
+wsgiref==0.1.2
+yolk==0.4.3
