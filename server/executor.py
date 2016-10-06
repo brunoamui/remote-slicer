@@ -13,7 +13,7 @@ class threadedSlicerExecutor(threading.Thread):
         self.slic3r_opt = '--support-material '
         self.files_to_slice = file
         self.result = ""
-        self.timeout = 240
+        self.timeout = 1000
         return
 
     def run(self):
