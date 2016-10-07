@@ -10,10 +10,10 @@ threads = []
 
 
 class threadedSlicerExecutor(threading.Thread):
-    def __init__(self, file):
+    def __init__(self, file, opt_add=""):
         threading.Thread.__init__(self)
         self.slic3r_cmd = '../Slic3r/bin/slic3r '
-        self.slic3r_opt = '--support-material '
+        self.slic3r_opt = '--support-material --nozzle-diameter 0.4 --filament-diameter 1.75 --output_filename_format [input_filename_base]_[layer_height].gcode' + opt_add + " "
         self.files_to_slice = file
         self.result = ""
         self.timeout = 1000

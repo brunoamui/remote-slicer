@@ -1,14 +1,14 @@
 # We need to import request to access the details of the POST request
 # and render_template, to render our templates (form and response)
 # we'll use url_for to get some URLs for the app on the templates
-from flask import Flask, render_template, request, url_for
+from flask import Flask, render_template, request, url_for, jsonify
 from executor import threadedSlicerExecutor
 import urllib
 import time
 import redis
 from rq import Queue
 import server
-
+import uuid
 
 # Initialize the Flask application
 app = Flask(__name__)
@@ -31,15 +31,15 @@ def form():
 def submit():
     url=request.form['URL']
     result_aux = q.enqueue(server.processMeshUrl, url)
-    meshList.append((url, result_aux))
-    return render_template('form_action.html', result="Adicionado")
+    uid = uuid.uuid1().hex
+    meshList.append((uid, result_aux))
+    return jsonify({"status": "OK",
+                    "uid": uid})
 
 @app.route('/status/')
 def status():
-    result_aux = []
-    for tuple in meshList:
-        result_aux.append((tuple[0], str(tuple[1].result)))
-    return render_template('form_action.html', result=result_aux)
+    result_aux = {tuple[0]:tuple[1].result for tuple in meshList}
+    return jsonify(result_aux)
 
 
 # Run the app :)
