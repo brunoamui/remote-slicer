@@ -29,14 +29,22 @@ def form():
 # Define a route for the action of the form, for example '/hello/'
 # We are also defining which type of requests this route is
 # accepting: POST requests in this case
-@app.route('/submit/', methods=['POST'])
+@app.route('/submit/', methods=['POST', 'OPTIONS'])
 def submit():
+    if request.method == 'OPTIONS':
+        headers = {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+            'Access-Control-Max-Age': 1000,
+            'Access-Control-Allow-Headers': 'origin, x-csrftoken, content-type, accept',
+        }
+        return '', 200, headers
     url=request.form['URL']
     result_aux = q.enqueue(server.processMeshUrl, url)
     uid = uuid.uuid1().hex
     meshList.append((uid, result_aux))
     return jsonify({"status": "OK",
-                    "uid": uid})
+                    "uid": uid}), 201
 
 @app.route('/status/')
 def status():
