@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Estimador de custos impressão 3d</title>
+    <script src="https://www.gstatic.com/firebasejs/3.4.1/firebase.js"></script>
+    <script>
+      // Initialize Firebase
+      var config = {
+        apiKey: "AIzaSyCU4aVz8qFvgGmor3f0lU7K6kA161RBv18",
+        authDomain: "fab-pro.firebaseapp.com",
+        databaseURL: "https://fab-pro.firebaseio.com",
+        storageBucket: "fab-pro.appspot.com",
+        messagingSenderId: "893796416720"
+      };
+      firebase.initializeApp(config);
+    </script>
+    <link href="style.css" rel="stylesheet" type="text/css" media="screen" />
+    <script src="https://www.gstatic.com/firebasejs/ui/live/0.5/firebase-ui-auth.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/live/0.5/firebase-ui-auth.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body>
+    <div id="container">
+      <h3>Estimador de custos impressão 3d</h3>
+      <div id="loading">Carregando...</div>
+      <div id="loaded" class="hidden">
+        <div id="main">
+          <div id="user-signed-in" class="hidden">
+            <div id="user-info">
+              <div id="photo-container">
+                <img id="photo"></img>
+              </div>
+              <div id="name"></div>
+              <div id="email"></div>
+              <div id="uid"></div>
+              <div class="clearfix"></div>
+            </div>
+          </div>
+          <div id="user-files" class="hidden"></div>
+          <div id="user-submit" class="hidden"></div>
+          <div id="user-signed-out" class="hidden">
+            <h4>Você não está logado</h4>
+            <div id="firebaseui-spa">
+              <h5>Faça Login para enviar um arquivo:</h5>
+              <div id="firebaseui-container"></div>
+            </div>
+          </div>
+          <p>
+            <button id="sign-out">Sign Out</button>
+            <button id="delete-account">Deletar conta</button>
+          </p>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.2.1/mustache.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

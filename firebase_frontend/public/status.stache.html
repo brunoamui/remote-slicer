@@ -1,0 +1,18 @@
+<script id="tpl-files" type="text/html">
+  {{#files}}
+    <div class="file_div">
+     {{filename}} :
+     <table>
+        {{#configs}}
+         <td>
+           <ul>
+             <li>Qualidade: {{name}}</li>
+             <li>Camadas: {{camadas}}</li>
+             <li>Duração: {{duracao}}</li>
+             <li>Filamento: {{filamento}}mm</li>
+           </ul>
+         </td>{{/configs}}
+       </table>
+      </div>
+   {{/files}}
+</script>

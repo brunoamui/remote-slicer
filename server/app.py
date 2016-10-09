@@ -15,7 +15,11 @@ from flask_cors import CORS, cross_origin
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
-conn = redis.from_url("redis://redistogo:436473da6c8d57832bbf8ac3235490a0@sculpin.redistogo.com:10283")
+#conn = redis.from_url("redis://redistogo:436473da6c8d57832bbf8ac3235490a0@sculpin.redistogo.com:10283")
+conn = redis.Redis( host='redis-10033.c10.us-east-1-2.ec2.cloud.redislabs.com',
+                    port=10033,
+                    password='passtest')
+
 q = Queue(connection=conn)
 
 meshList = []
@@ -29,22 +33,14 @@ def form():
 # Define a route for the action of the form, for example '/hello/'
 # We are also defining which type of requests this route is
 # accepting: POST requests in this case
-@app.route('/submit/', methods=['POST', 'OPTIONS'])
+@app.route('/submit/', methods=['POST'])
 def submit():
-    if request.method == 'OPTIONS':
-        headers = {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-            'Access-Control-Max-Age': 1000,
-            'Access-Control-Allow-Headers': 'origin, x-csrftoken, content-type, accept',
-        }
-        return '', 200, headers
     url=request.form['URL']
     result_aux = q.enqueue(server.processMeshUrl, url)
     uid = uuid.uuid1().hex
     meshList.append((uid, result_aux))
     return jsonify({"status": "OK",
-                    "uid": uid}), 201
+                    "uid": uid})
 
 @app.route('/status/')
 def status():
@@ -57,5 +53,5 @@ if __name__ == '__main__':
     app.debug = True
     app.run(
         host="0.0.0.0",
-        port=int("80")
+        port=int("8080")
         )
