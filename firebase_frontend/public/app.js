@@ -37,6 +37,15 @@ var ui = new firebaseui.auth.AuthUI(firebase.auth());
 // Keep track of the currently signed in user.
 var currentUid = null;
 
+var database = firebase.database();
+
+var template_moustache = null;
+$.get('status.stache.html', function(templates) {
+// Fetch the <script /> block from the loaded external
+// template file which contains our greetings template.
+template_moustache = $(templates).filter('#tpl-files').html();});
+
+
 /**
  * Redirects to the FirebaseUI widget.
  */
@@ -72,12 +81,15 @@ var handleSignedInUser = function(user) {
   }
 
   document.getElementById('user-files').style.display = 'block';
-  getStatus()
+  document.getElementById('user-submit').style.display = 'block';
+  getStatus();
+  var periodicStatus = setInterval(getStatus, 5000);
 };
 
 
 
 var getStatus = function() {
+  console.log("getStatus");
   var fileList = []
   var configList = []
   var xhttp = new XMLHttpRequest();
@@ -90,21 +102,19 @@ var getStatus = function() {
            continue;
        }
        //Do your logic with the property here
-       console.log(file_id);
        configList = [];
        for (var Config in data[file_id]) {
          if (!data.hasOwnProperty(file_id)) {
              //The current property is not a direct property of p
              continue;
          }
-         console.log(Config);
          configList.push({"name": Config,
                           "camadas":data[file_id][Config]["Camadas"],
                           "duracao":data[file_id][Config]["Duracao"],
                           "filamento":data[file_id][Config]["Filamento"]});
 
        }
-       if (configList){
+       if (configList.length > 0){
          var a= document.createElement('a');
          a.href= data[file_id]["High"]["url"];
          fileList.push({"file": file_id,
@@ -115,15 +125,10 @@ var getStatus = function() {
 
      }
      view_moustache = {"files": fileList};
-     $.get('status.stache.html', function(templates) {
-     // Fetch the <script /> block from the loaded external
-     // template file which contains our greetings template.
-     var template_moustache = $(templates).filter('#tpl-files').html();
      document.getElementById("user-files").innerHTML = Mustache.to_html(template_moustache,view_moustache);
-     });
-    }
+   }
   };
-  xhttp.open("GET", "http://ec2-52-34-191-97.us-west-2.compute.amazonaws.com/status/", true);
+  xhttp.open("GET", "https://ec2-52-34-191-97.us-west-2.compute.amazonaws.com/status/", true);
   xhttp.send();
 
 }
@@ -163,5 +168,56 @@ var initApp = function() {
         firebase.auth().currentUser.delete();
       });
 };
+
+
+var Upload_File = function () {
+  // File or Blob named mountains.jpg
+var file = document.getElementById("arquivo").files[0];
+var storageRef = firebase.storage().ref();
+
+// Create the file metadata
+var metadata = {
+  contentType: 'application/sla'
+};
+
+// Upload file and metadata to the object 'images/mountains.jpg'
+var uploadTask = storageRef.child('models/' + file.name).put(file, metadata);
+
+// Listen for state changes, errors, and completion of the upload.
+uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED, // or 'state_changed'
+  function(snapshot) {
+    // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+    var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+    console.log('Upload is ' + progress + '% done');
+    switch (snapshot.state) {
+      case firebase.storage.TaskState.PAUSED: // or 'paused'
+        console.log('Upload is paused');
+        break;
+      case firebase.storage.TaskState.RUNNING: // or 'running'
+        console.log('Upload is running');
+        break;
+    }
+  }, function(error) {
+  switch (error.code) {
+    case 'storage/unauthorized':
+      // User doesn't have permission to access the object
+      break;
+
+    case 'storage/canceled':
+      // User canceled the upload
+      break;
+
+    case 'storage/unknown':
+      // Unknown error occurred, inspect error.serverResponse
+      break;
+  }
+  }, function() {
+    // Upload completed successfully, now we can get the download URL
+    var downloadURL = uploadTask.snapshot.downloadURL;
+    console.log(downloadURL);
+    $.post( "https://ec2-52-34-191-97.us-west-2.compute.amazonaws.com/submit/", { 'URL': downloadURL} );
+  });
+}
+
 
 window.addEventListener('load', initApp);

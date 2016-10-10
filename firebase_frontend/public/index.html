@@ -38,7 +38,25 @@
             </div>
           </div>
           <div id="user-files" class="hidden"></div>
-          <div id="user-submit" class="hidden"></div>
+          <div id="user-submit" class="hidden">
+            <input type="file" id="arquivo" name="arquivo" onchange="handleFileSelect(this.files)" />
+            <output id="list"></output>
+            <script>
+              function handleFileSelect(evt) {
+                var files = evt; // FileList object
+
+                // files is a FileList of File objects. List some properties.
+                var output = [];
+                for (var i = 0, f; f = files[i]; i++) {
+                  output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ',
+                              f.size, ' bytes, last modified: ',
+                              f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
+                              '</li>');
+                }
+                document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>' + '<input type="button" value="Submit" onclick="Upload_File()"/>';
+              }
+            </script>
+          </div>
           <div id="user-signed-out" class="hidden">
             <h4>Você não está logado</h4>
             <div id="firebaseui-spa">
