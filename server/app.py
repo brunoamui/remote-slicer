@@ -1,7 +1,7 @@
 # We need to import request to access the details of the POST request
 # and render_template, to render our templates (form and response)
 # we'll use url_for to get some URLs for the app on the templates
-from flask import Flask, render_template, request, url_for, jsonify
+from flask import Flask, render_template, request, url_for, jsonify, g
 from executor import threadedSlicerExecutor
 import urllib
 import time
@@ -22,7 +22,7 @@ conn = redis.Redis( host='redis-10033.c10.us-east-1-2.ec2.cloud.redislabs.com',
 
 q = Queue(connection=conn)
 
-meshList = []
+g.meshList = []
 
 
 
@@ -39,13 +39,13 @@ def submit():
     url=request.form['URL']
     result_aux = q.enqueue(server.processMeshUrl, url)
     uid = uuid.uuid1().hex
-    meshList.append((uid, result_aux))
+    g.meshList.append((uid, result_aux))
     return jsonify({"status": "OK",
                     "uid": uid})
 
 @app.route('/status/')
 def status():
-    result_aux = {tuple[0]:tuple[1].result for tuple in meshList}
+    result_aux = {tuple[0]:tuple[1].result for tuple in g.meshList}
     return jsonify(result_aux)
 
 
