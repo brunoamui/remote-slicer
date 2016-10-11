@@ -128,7 +128,7 @@ var getStatus = function() {
      document.getElementById("user-files").innerHTML = Mustache.to_html(template_moustache,view_moustache);
    }
   };
-  xhttp.open("GET", "https://ec2-52-34-191-97.us-west-2.compute.amazonaws.com/status/", true);
+  xhttp.open("GET", "https://fabproapi.tk/status/", true);
   xhttp.send();
 
 }
@@ -215,7 +215,7 @@ uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED, // or 'state_changed'
     // Upload completed successfully, now we can get the download URL
     var downloadURL = uploadTask.snapshot.downloadURL;
     console.log(downloadURL);
-    $.post( "https://ec2-52-34-191-97.us-west-2.compute.amazonaws.com/submit/", { 'URL': downloadURL} );
+    $.post( "https://fabproapi.tk/submit/", { 'URL': downloadURL} );
   });
 }
 

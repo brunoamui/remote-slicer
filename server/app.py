@@ -17,9 +17,9 @@ app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 # conn = redis.from_url("redis://redistogo:436473da6c8d57832bbf8ac3235490a0@sculpin.redistogo.com:10283")
-conn = redis.Redis( host='redis-10033.c10.us-east-1-2.ec2.cloud.redislabs.com',
-                    port=10033,
-                    password='passtest')
+conn = redis.StrictRedis(host='redis-15555.c10.us-east-1-2.ec2.cloud.redislabs.com',
+                         port=15555,
+                         password='passtest')
 
 q = Queue(connection=conn)
 
