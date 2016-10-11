@@ -10,19 +10,23 @@ from rq import Queue
 import server
 import uuid
 from flask_cors import CORS, cross_origin
+import dill as pickle
 
 # Initialize the Flask application
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
-#conn = redis.from_url("redis://redistogo:436473da6c8d57832bbf8ac3235490a0@sculpin.redistogo.com:10283")
+# conn = redis.from_url("redis://redistogo:436473da6c8d57832bbf8ac3235490a0@sculpin.redistogo.com:10283")
 conn = redis.Redis( host='redis-10033.c10.us-east-1-2.ec2.cloud.redislabs.com',
                     port=10033,
                     password='passtest')
 
 q = Queue(connection=conn)
 
-g.meshList = []
+try:
+    meshList = pickle.loads(conn.get('meshList'))
+except(TypeError):
+    conn.set('meshList', pickle.dumps([]))
 
 
 
@@ -36,16 +40,19 @@ def form():
 # accepting: POST requests in this case
 @app.route('/submit/', methods=['POST'])
 def submit():
+    meshList = pickle.loads(conn.get('meshList'))
     url=request.form['URL']
     result_aux = q.enqueue(server.processMeshUrl, url)
     uid = uuid.uuid1().hex
-    g.meshList.append((uid, result_aux))
+    meshList.append((uid, result_aux))
+    conn.set('meshList', pickle.dumps(meshList))
     return jsonify({"status": "OK",
                     "uid": uid})
 
 @app.route('/status/')
 def status():
-    result_aux = {tuple[0]:tuple[1].result for tuple in g.meshList}
+    meshList = pickle.loads(conn.get('meshList'))
+    result_aux = {tuple[0]:tuple[1].result for tuple in meshList}
     return jsonify(result_aux)
 
 
@@ -54,5 +61,5 @@ if __name__ == '__main__':
     app.debug = True
     app.run(
         host="0.0.0.0",
-        port=int("80")
+        port=int("8080")
         )
