@@ -6,27 +6,21 @@ from executor import threadedSlicerExecutor
 import urllib
 import time
 import redis
-from rq import Queue
+from rq import Queue, Connection
 import server
 import uuid
 from flask_cors import CORS, cross_origin
 import dill as pickle
+from server_config import cfg
 
 # Initialize the Flask application
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 # conn = redis.from_url("redis://redistogo:436473da6c8d57832bbf8ac3235490a0@sculpin.redistogo.com:10283")
-conn = redis.StrictRedis(host='redis-15555.c10.us-east-1-2.ec2.cloud.redislabs.com',
-                         port=15555,
-                         password='passtest')
+rq_conn = redis.StrictRedis(host=cfg.redis["host"], port=cfg.redis["port"], password=cfg.redis["password"])
 
-q = Queue(connection=conn)
-
-try:
-    meshList = pickle.loads(conn.get('meshList'))
-except(TypeError):
-    conn.set('meshList', pickle.dumps([]))
+q = Queue(connection=rq_conn)
 
 
 
@@ -40,19 +34,25 @@ def form():
 # accepting: POST requests in this case
 @app.route('/submit/', methods=['POST'])
 def submit():
-    meshList = pickle.loads(conn.get('meshList'))
-    url=request.form['URL']
+    url = request.form['URL']
+
     result_aux = q.enqueue(server.processMeshUrl, url)
     uid = uuid.uuid1().hex
+
+    conn = redis.StrictRedis(host=cfg.redis["host"], port=cfg.redis["port"], password=cfg.redis["password"])
+    meshList = pickle.loads(conn.get('meshList'))
     meshList.append((uid, result_aux))
     conn.set('meshList', pickle.dumps(meshList))
+
     return jsonify({"status": "OK",
                     "uid": uid})
 
 @app.route('/status/')
 def status():
+    conn = redis.StrictRedis(host=cfg.redis["host"], port=cfg.redis["port"], password=cfg.redis["password"])
     meshList = pickle.loads(conn.get('meshList'))
-    result_aux = {tuple[0]:tuple[1].result for tuple in meshList}
+
+    result_aux = {tuple[0]: tuple[1].result for tuple in meshList}
     return jsonify(result_aux)
 
 
