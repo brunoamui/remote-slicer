@@ -18,10 +18,6 @@ app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 # conn = redis.from_url("redis://redistogo:436473da6c8d57832bbf8ac3235490a0@sculpin.redistogo.com:10283")
-rq_conn = redis.StrictRedis(host=cfg.redis["host"], port=cfg.redis["port"], password=cfg.redis["password"])
-
-q = Queue(connection=rq_conn)
-
 
 
 # Define a route for the default URL, which loads the form
@@ -36,7 +32,11 @@ def form():
 def submit():
     url = request.form['URL']
 
+
+    rq_conn = redis.StrictRedis(host=cfg.redis["host"], port=cfg.redis["port"], password=cfg.redis["password"])
+    q = Queue(connection=rq_conn)
     result_aux = q.enqueue(server.processMeshUrl, url)
+    
     uid = uuid.uuid1().hex
 
     conn = redis.StrictRedis(host=cfg.redis["host"], port=cfg.redis["port"], password=cfg.redis["password"])
