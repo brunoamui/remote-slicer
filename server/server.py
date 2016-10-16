@@ -15,7 +15,7 @@ db = firebase.database()
 
 
 
-def processMeshUrl(url, user_id):
+def processMeshUrl(url, user_id, uid):
     local_filename, headers = urllib.urlretrieve(url)
 
     executors = [("High", threadedSlicerExecutor(local_filename, " --layer-height 0.1 ")),
@@ -40,8 +40,8 @@ def processMeshUrl(url, user_id):
                 return_dict[tuple[0]] = dados
                 executors.remove(tuple)
 
-    db.child("users").child(user_id)
-
-    data_dict = {"users/"+user_id: {"result": return_dict}}
+    db.child("users").child(user_id).child(uid)
+    data_dict = {"result": return_dict}
     db.update(data_dict)
+
     return return_dict
