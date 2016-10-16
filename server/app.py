@@ -61,7 +61,7 @@ def status():
     try:
         result_aux = {tuple[0]: tuple[1].result for tuple in meshList}
     except (AttributeError):
-        result_aux = {tuple[0]: tuple[1].result for tuple in meshList}
+        result_aux = {tuple[0]: tuple[1] for tuple in meshList}
     return_json = jsonify(result_aux)
     del meshList
     del result_aux
