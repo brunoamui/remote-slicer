@@ -31,24 +31,20 @@ def form():
 @app.route('/submit/', methods=['POST'])
 def submit():
     url = request.form['URL']
-
+    user_id = request.form['user_id']
 
     rq_conn = redis.StrictRedis(host=cfg.redis["host"], port=cfg.redis["port"], password=cfg.redis["password"])
     q = Queue(connection=rq_conn)
-    result_aux = q.enqueue(server.processMeshUrl, url)
+    result_aux = q.enqueue(server.processMeshUrl, url, user_id)
 
     uid = uuid.uuid1().hex
 
     conn = redis.StrictRedis(host=cfg.redis["host"], port=cfg.redis["port"], password=cfg.redis["password"])
-    try:
-        meshList = pickle.loads(conn.get('meshList'))
-    except (TypeError):
-        meshList = []
-    meshList.append((uid, "result_aux"))
-    conn.set('meshList', pickle.dumps(meshList))
-    del meshList
+
+    conn.set(uid, "wait")
+
     del result_aux
-    return jsonify({"status": "OK",
+    return jsonify({"status": "wait",
                     "uid": uid})
 
 @app.route('/status/')

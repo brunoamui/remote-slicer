@@ -39,6 +39,7 @@ var currentUid = null;
 
 var database = firebase.database();
 
+
 var template_moustache = null;
 $.get('status.stache.html', function(templates) {
 // Fetch the <script /> block from the loaded external
@@ -215,7 +216,17 @@ uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED, // or 'state_changed'
     // Upload completed successfully, now we can get the download URL
     var downloadURL = uploadTask.snapshot.downloadURL;
     console.log(downloadURL);
-    $.post( "https://fabproapi.tk/submit/", { 'URL': downloadURL} );
+    $.post( "https://fabproapi.tk/submit/", { 'URL': downloadURL, "user_id": currentUid},
+            function(data){
+                  console.log(data.status)
+                  console.log(data.uid)
+                  firebase.database().ref('users/' + currentUid + "/" + data.uid).set({
+                    uid: data.uid,
+                    url: downloadURL,
+                    result : {}
+                  });
+            } );
+
   });
 }
 
