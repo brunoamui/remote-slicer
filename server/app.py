@@ -41,9 +41,10 @@ def submit():
 
     conn = redis.StrictRedis(host=cfg.redis["host"], port=cfg.redis["port"], password=cfg.redis["password"])
     meshList = pickle.loads(conn.get('meshList'))
-    meshList.append((uid, result_aux))
+    meshList.append((uid, "result_aux"))
     conn.set('meshList', pickle.dumps(meshList))
     del meshList
+    del result_aux
     return jsonify({"status": "OK",
                     "uid": uid})
 
