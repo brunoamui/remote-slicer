@@ -40,7 +40,10 @@ def submit():
     uid = uuid.uuid1().hex
 
     conn = redis.StrictRedis(host=cfg.redis["host"], port=cfg.redis["port"], password=cfg.redis["password"])
-    meshList = pickle.loads(conn.get('meshList'))
+    try:
+        meshList = pickle.loads(conn.get('meshList'))
+    except (TypeError):
+        meshList = []
     meshList.append((uid, "result_aux"))
     conn.set('meshList', pickle.dumps(meshList))
     del meshList
@@ -51,7 +54,10 @@ def submit():
 @app.route('/status/')
 def status():
     conn = redis.StrictRedis(host=cfg.redis["host"], port=cfg.redis["port"], password=cfg.redis["password"])
-    meshList = pickle.loads(conn.get('meshList'))
+    try:
+        meshList = pickle.loads(conn.get('meshList'))
+    except (TypeError):
+        meshList = []
     result_aux = {tuple[0]: tuple[1].result for tuple in meshList}
     return_json = jsonify(result_aux)
     del meshList
