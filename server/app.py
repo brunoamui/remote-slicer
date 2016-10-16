@@ -36,14 +36,14 @@ def submit():
     rq_conn = redis.StrictRedis(host=cfg.redis["host"], port=cfg.redis["port"], password=cfg.redis["password"])
     q = Queue(connection=rq_conn)
     result_aux = q.enqueue(server.processMeshUrl, url)
-    
+
     uid = uuid.uuid1().hex
 
     conn = redis.StrictRedis(host=cfg.redis["host"], port=cfg.redis["port"], password=cfg.redis["password"])
     meshList = pickle.loads(conn.get('meshList'))
     meshList.append((uid, result_aux))
     conn.set('meshList', pickle.dumps(meshList))
-
+    del meshList
     return jsonify({"status": "OK",
                     "uid": uid})
 
@@ -51,9 +51,11 @@ def submit():
 def status():
     conn = redis.StrictRedis(host=cfg.redis["host"], port=cfg.redis["port"], password=cfg.redis["password"])
     meshList = pickle.loads(conn.get('meshList'))
-
     result_aux = {tuple[0]: tuple[1].result for tuple in meshList}
-    return jsonify(result_aux)
+    return_json = jsonify(result_aux)
+    del meshList
+    del result_aux
+    return return_json
 
 
 # Run the app :)
