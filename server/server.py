@@ -42,6 +42,6 @@ def processMeshUrl(url, user_id):
 
     db.child("users").child(user_id)
 
-    data_dict = {"users/"+user_id: return_dict}
+    data_dict = {"users/"+user_id: {"result": return_dict}}
     db.update(data_dict)
     return return_dict

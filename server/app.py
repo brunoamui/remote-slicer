@@ -35,7 +35,10 @@ def submit():
 
     rq_conn = redis.StrictRedis(host=cfg.redis["host"], port=cfg.redis["port"], password=cfg.redis["password"])
     q = Queue(connection=rq_conn)
-    result_aux = q.enqueue(server.processMeshUrl, url, user_id)
+    #result_aux = q.enqueue(server.processMeshUrl, url, user_id)
+    result_aux = q.enqueue_call(func=server.processMeshUrl,
+                                args=(url, user_id))
+
 
     uid = uuid.uuid1().hex
 
